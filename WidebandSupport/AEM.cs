@@ -130,35 +130,44 @@ namespace WidebandSupport
         private void InitiateReading()
         {
 
-            while (continueRunning)
+            try
             {
+                comPort.Open();
 
-                try
+                while (continueRunning)
                 {
-                    String line = null;
-                    double afrValue;
 
-                    if (testMode)
+                    try
                     {
-                        line = GetLineFromSamplePacket();
+                        String line = null;
+                        double afrValue;
+
+                        if (testMode)
+                        {
+                            line = GetLineFromSamplePacket();
+                        }
+                        else
+                        {
+                            line = comPort.ReadLine();
+                        }
+
+                        if (line != null && 0 != line.Trim().Length && true == Double.TryParse(line, out afrValue))
+                        {
+                            latestReading = afrValue;
+                        }
                     }
-                    else
+                    catch (ThreadInterruptedException)
                     {
-                        line = comPort.ReadLine();
+                        // nothing
                     }
 
-                    if (line != null && 0 != line.Trim().Length && true == Double.TryParse(line, out afrValue))
-                    {
-                        latestReading = afrValue;
-                    }
-                }
-                catch (ThreadInterruptedException)
-                {
-                    // nothing
                 }
 
             }
-
+            finally
+            {
+                comPort.Close();
+            }
         }
 
         public void Start()
@@ -168,7 +177,6 @@ namespace WidebandSupport
                 if (worker == null || worker.IsAlive == false)
                 {
                     continueRunning = true;
-                    comPort.Open();
                     worker = new Thread(new ThreadStart(InitiateReading));
                     worker.Start();
                 }
@@ -195,8 +203,6 @@ namespace WidebandSupport
                         // if worker is still alive, most likely still blocked on readByte, interrupt
                         worker.Interrupt();
                     }
-
-                    comPort.Close();
 
                 }
                 else
