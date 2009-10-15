@@ -231,100 +231,108 @@ namespace WidebandSupport
             bool packetStarted = false, normalOperation = false;
             int multiplier = 0;
 
-            while (true == continueRunning)
+            try
             {
-                try
+                comPort.Open();
+
+                while (true == continueRunning)
                 {
-                    int aByte = 0;
-
-                    if (true == testMode)
+                    try
                     {
-                        aByte = GetByteFromSamplePacket(); // test packet
-                    }
-                    else
-                    {
-                        aByte = comPort.ReadByte(); // to read from the serial port
-                    }
+                        int aByte = 0;
 
-                    if ((aByte & 128) == 128 && (aByte & 32) != 32 && (aByte & 2) != 2)
-                    {
-                        // last bit is set, 5th bit is 0, and 2nd bit is 0, must be start packet.
-                        packetStarted = true;
-                        buffer.Clear();
-                        buffer.Add((byte)aByte);
-                    }
-                    else
-                    {
-
-                        // LM1 doesn't have a stop signal, the message can between 2 to 8 words.
-                        // data consists of 16 packets (each packet is 16 bytes, a word)
-
-                        if (true == packetStarted && buffer.Count <= (16 * 2))
+                        if (true == testMode)
                         {
+                            aByte = GetByteFromSamplePacket(); // test packet
+                        }
+                        else
+                        {
+                            aByte = comPort.ReadByte(); // to read from the serial port
+                        }
 
+                        if ((aByte & 128) == 128 && (aByte & 32) != 32 && (aByte & 2) != 2)
+                        {
+                            // last bit is set, 5th bit is 0, and 2nd bit is 0, must be start packet.
+                            packetStarted = true;
+                            buffer.Clear();
                             buffer.Add((byte)aByte);
-
-                            switch (buffer.Count)
-                            {
-                                case 2:
-                                    byte[] startWordBytes = new byte[2] { buffer[0], buffer[1] };
-                                    int startWord = GetWord(startWordBytes);
-                                    int status = GetStatus(startWord);
-                                    if (0 == status)
-                                    {
-                                        // 0000 is normal operation
-                                        multiplier = GetMultiplier(startWord);
-                                        normalOperation = true;
-                                    }
-                                    else
-                                    {
-                                        // 0001 Lambda value contains O2 level in 1/10%
-                                        // 0010 Free air Calib in progress, Lambda data not valid
-                                        // 0011 Need Free air Calibration request, Lambda data not valid
-                                        // 0100 Warming up, Lambda value is temp in 1/10% of operating temp
-                                        // 0101 Heater Calibration, Lambda value contains calibration countdown
-                                        // 0110 Error code in Lambda value
-                                        // 0111 Lambda Value is Flash level in 1/10%
-                                        // 1xxx reserved
-
-                                        if (normalOperation == true)
-                                        {
-                                            normalOperation = false;
-                                            latestReading = 0;
-                                        }
-                                    }
-                                    break;
-                                case 4:
-                                    if (normalOperation)
-                                    {
-                                        byte[] lambdaWordBytes = new byte[2] { buffer[2], buffer[3] };
-                                        int lambdaWord = GetWord(lambdaWordBytes);
-                                        latestReading = (GetLambda(lambdaWord) + 500) * multiplier / 10000d;
-                                    }
-                                    break;
-                            }
-
                         }
                         else
                         {
 
-                            // either packetStarted is false, or we have more words than expected
-                            // either way, reset to safe values
+                            // LM1 doesn't have a stop signal, the message can between 2 to 8 words.
+                            // data consists of 16 packets (each packet is 16 bytes, a word)
 
-                            packetStarted = false;
-                            normalOperation = false;
+                            if (true == packetStarted && buffer.Count <= (16 * 2))
+                            {
 
+                                buffer.Add((byte)aByte);
+
+                                switch (buffer.Count)
+                                {
+                                    case 2:
+                                        byte[] startWordBytes = new byte[2] { buffer[0], buffer[1] };
+                                        int startWord = GetWord(startWordBytes);
+                                        int status = GetStatus(startWord);
+                                        if (0 == status)
+                                        {
+                                            // 0000 is normal operation
+                                            multiplier = GetMultiplier(startWord);
+                                            normalOperation = true;
+                                        }
+                                        else
+                                        {
+                                            // 0001 Lambda value contains O2 level in 1/10%
+                                            // 0010 Free air Calib in progress, Lambda data not valid
+                                            // 0011 Need Free air Calibration request, Lambda data not valid
+                                            // 0100 Warming up, Lambda value is temp in 1/10% of operating temp
+                                            // 0101 Heater Calibration, Lambda value contains calibration countdown
+                                            // 0110 Error code in Lambda value
+                                            // 0111 Lambda Value is Flash level in 1/10%
+                                            // 1xxx reserved
+
+                                            if (normalOperation == true)
+                                            {
+                                                normalOperation = false;
+                                                latestReading = 0;
+                                            }
+                                        }
+                                        break;
+                                    case 4:
+                                        if (normalOperation)
+                                        {
+                                            byte[] lambdaWordBytes = new byte[2] { buffer[2], buffer[3] };
+                                            int lambdaWord = GetWord(lambdaWordBytes);
+                                            latestReading = (GetLambda(lambdaWord) + 500) * multiplier / 10000d;
+                                        }
+                                        break;
+                                }
+
+                            }
+                            else
+                            {
+
+                                // either packetStarted is false, or we have more words than expected
+                                // either way, reset to safe values
+
+                                packetStarted = false;
+                                normalOperation = false;
+
+                            }
                         }
+
+
                     }
 
-
+                    catch (ThreadInterruptedException)
+                    {
+                        // nothing
+                    }
                 }
-
-                catch (ThreadInterruptedException)
-                {
-                    // nothing
-                }
-
+            }
+            finally
+            {
+                comPort.Close();
             }
 
         }
@@ -336,7 +344,6 @@ namespace WidebandSupport
                 if (worker == null || worker.IsAlive == false)
                 {
                     continueRunning = true;
-                    comPort.Open();
                     worker = new Thread(new ThreadStart(InitiateReading));
                     worker.Start();
                 }
@@ -363,8 +370,6 @@ namespace WidebandSupport
                         // if worker is still alive, most likely still blocked on readByte, interrupt
                         worker.Interrupt();
                     }
-
-                    comPort.Close();
 
                 }
                 else

@@ -167,54 +167,64 @@ namespace WidebandSupport
             List<byte> packetContentBuffer = new List<byte>();
             bool packetStarted = false;
 
-            while (true == continueRunning)
+            try
             {
+                comPort.Open();
 
-                try
+                while (true == continueRunning)
                 {
 
-                    byte aByte = 0;
+                    try
+                    {
 
-                    if (testMode)
-                    {
-                        aByte = GetByteFromSamplePacket(); // test packet
-                    }
-                    else
-                    {
-                        aByte = (byte)comPort.ReadByte(); // to read from the serial port
-                    }
+                        byte aByte = 0;
 
-                    switch (aByte)
+                        if (testMode)
+                        {
+                            aByte = GetByteFromSamplePacket(); // test packet
+                        }
+                        else
+                        {
+                            aByte = (byte)comPort.ReadByte(); // to read from the serial port
+                        }
+
+                        switch (aByte)
+                        {
+                            case 0x80:
+                                // start byte
+                                packetContentBuffer.Clear();
+                                packetContentBuffer.Add(aByte);
+                                packetStarted = true;
+                                break;
+                            case 0x40:
+                                // stop byte
+                                if (packetStarted)
+                                {
+                                    packetContentBuffer.Add(aByte);
+                                    latestReading = GetDataFromPacket(packetContentBuffer);
+                                    packetStarted = false;
+                                }
+                                break;
+                            default:
+                                if (packetStarted)
+                                {
+                                    packetContentBuffer.Add(aByte);
+                                }
+                                break;
+                        }
+
+                    }
+                    catch (ThreadInterruptedException)
                     {
-                        case 0x80:
-                            // start byte
-                            packetContentBuffer.Clear();
-                            packetContentBuffer.Add(aByte);
-                            packetStarted = true;
-                            break;
-                        case 0x40:
-                            // stop byte
-                            if (packetStarted)
-                            {
-                                packetContentBuffer.Add(aByte);
-                                latestReading = GetDataFromPacket(packetContentBuffer);
-                                packetStarted = false;
-                            }
-                            break;
-                        default:
-                            if (packetStarted)
-                            {
-                                packetContentBuffer.Add(aByte);
-                            }
-                            break;
+                        // nothing
                     }
 
                 }
-                catch (ThreadInterruptedException)
-                {
-                    // nothing
-                }
 
+            }
+            finally
+            {
+                comPort.Close();
             }
 
         }
@@ -226,7 +236,6 @@ namespace WidebandSupport
                 if (null == worker || false == worker.IsAlive)
                 {
                     continueRunning = true;
-                    comPort.Open();
                     worker = new Thread(new ThreadStart(InitiateReading));
                     worker.Start();
                 }
@@ -253,8 +262,6 @@ namespace WidebandSupport
                         // if worker is still alive, most likely still blocked on readByte, interrupt
                         worker.Interrupt();
                     }
-
-                    comPort.Close();
 
                 }
                 else
