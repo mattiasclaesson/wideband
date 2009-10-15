@@ -1,0 +1,6 @@
+C:\Users\George\Documents\Visual Studio 2008\Projects\WidebandSupport\trunk\WidebandSupport\bin\Debug\WidebandSupport.exe
+C:\Users\George\Documents\Visual Studio 2008\Projects\WidebandSupport\trunk\WidebandSupport\bin\Debug\WidebandSupport.pdb
+C:\Users\George\Documents\Visual Studio 2008\Projects\WidebandSupport\trunk\WidebandSupport\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\George\Documents\Visual Studio 2008\Projects\WidebandSupport\trunk\WidebandSupport\obj\Debug\WidebandSupport.exe
+C:\Users\George\Documents\Visual Studio 2008\Projects\WidebandSupport\trunk\WidebandSupport\obj\Debug\WidebandSupport.pdb
+C:\Users\George\Documents\Visual Studio 2008\Projects\WidebandSupport\trunk\WidebandSupport\bin\Debug\WidebandSupport.exe.config
