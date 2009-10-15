@@ -125,7 +125,7 @@ namespace WidebandSupport
                 sampleBytePacketIndex = 0;
                 Thread.Sleep(TimeSpan.FromMilliseconds(80));
             }
-            
+
             return packet[sampleBytePacketIndex++];
 
         }
@@ -137,69 +137,80 @@ namespace WidebandSupport
 
             bool packetStarted = false;
 
-            while (continueRunning)
+            try
             {
 
-                try
+                comPort.Open();
+
+
+                while (continueRunning)
                 {
 
-                    byte aByte = 0;
+                    try
+                    {
 
-                    if (testMode)
-                    {
-                        aByte = GetByteFromSamplePacket(); // test packet
-                    }
-                    else
-                    {
-                        aByte = (byte)comPort.ReadByte(); // to read from the serial port
-                    }
+                        byte aByte = 0;
 
-                    if (buffer.Count >= 2 && 0x02 == aByte && 0x01 == buffer[buffer.Count - 1] && 0x00 == buffer[buffer.Count - 2])
-                    {
-                        packetStarted = true;
-                        buffer.Clear();
-                        buffer.Add(0x00);
-                        buffer.Add(0x01);
-                        buffer.Add(aByte);
-                    }
-                    else
-                    {
-                        if (true == packetStarted && buffer.Count <= 14)
+                        if (testMode)
                         {
-
-                            buffer.Add(aByte);
-
-                            switch (buffer.Count)
-                            {
-                                case 4:
-                                    {
-                                        latestReading = buffer[3] / 10d;
-                                    }
-                                    break;
-                                case 14:
-                                    {
-                                        buffer.Clear();
-                                        packetStarted = false;
-                                    }
-                                    break;
-                            }
+                            aByte = GetByteFromSamplePacket(); // test packet
                         }
                         else
                         {
-                            buffer.Add(aByte);
-                            packetStarted = false;
+                            aByte = (byte)comPort.ReadByte(); // to read from the serial port
                         }
+
+                        if (buffer.Count >= 2 && 0x02 == aByte && 0x01 == buffer[buffer.Count - 1] && 0x00 == buffer[buffer.Count - 2])
+                        {
+                            packetStarted = true;
+                            buffer.Clear();
+                            buffer.Add(0x00);
+                            buffer.Add(0x01);
+                            buffer.Add(aByte);
+                        }
+                        else
+                        {
+                            if (true == packetStarted && buffer.Count <= 14)
+                            {
+
+                                buffer.Add(aByte);
+
+                                switch (buffer.Count)
+                                {
+                                    case 4:
+                                        {
+                                            latestReading = buffer[3] / 10d;
+                                        }
+                                        break;
+                                    case 14:
+                                        {
+                                            buffer.Clear();
+                                            packetStarted = false;
+                                        }
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                buffer.Add(aByte);
+                                packetStarted = false;
+                            }
+                        }
+
+                    }
+
+                    catch (ThreadInterruptedException)
+                    {
+                        // nothing
                     }
 
                 }
 
-                catch (ThreadInterruptedException)
-                {
-                    // nothing
-                }
-
             }
-
+            finally
+            {
+                comPort.Close();
+            }
         }
 
         public void Start()
@@ -209,7 +220,6 @@ namespace WidebandSupport
                 if (worker == null || worker.IsAlive == false)
                 {
                     continueRunning = true;
-                    comPort.Open();
                     worker = new Thread(new ThreadStart(InitiateReading));
                     worker.Start();
                 }
@@ -236,8 +246,6 @@ namespace WidebandSupport
                         // if worker is still alive, most likely still blocked on readByte, interrupt
                         worker.Interrupt();
                     }
-
-                    comPort.Close();
 
                 }
                 else
