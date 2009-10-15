@@ -1,6 +1,0 @@
-C:\Users\George\Documents\Visual Studio 2008\Projects\WidebandSupport\trunk\WidebandSupport\obj\Release\ResolveAssemblyReference.cache
-C:\Users\George\Documents\Visual Studio 2008\Projects\WidebandSupport\trunk\WidebandSupport\bin\Release\WidebandSupport.pdb
-C:\Users\George\Documents\Visual Studio 2008\Projects\WidebandSupport\trunk\WidebandSupport\obj\Release\WidebandSupport.pdb
-C:\Users\George\Documents\Visual Studio 2008\Projects\WidebandSupport\trunk\WidebandSupport\bin\Release\WidebandSupport.dll.config
-C:\Users\George\Documents\Visual Studio 2008\Projects\WidebandSupport\trunk\WidebandSupport\bin\Release\WidebandSupport.dll
-C:\Users\George\Documents\Visual Studio 2008\Projects\WidebandSupport\trunk\WidebandSupport\obj\Release\WidebandSupport.dll
