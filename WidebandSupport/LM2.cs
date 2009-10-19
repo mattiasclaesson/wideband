@@ -22,7 +22,7 @@ using System.IO.Ports;
 namespace WidebandSupport
 {
 
-    public class LC1WidebandReader : IWidebandReader
+    public class LM2WidebandReader : IWidebandReader
     {
 
         private static BitPosition[] lambdaBitPositions = { 
@@ -90,7 +90,7 @@ namespace WidebandSupport
             set { testMode = value; }
         }
 
-        public LC1WidebandReader(String comPortName)
+        public LM2WidebandReader(String comPortName)
         {
 
             if (false == IsSerialPortNameValid(comPortName))
@@ -147,29 +147,18 @@ namespace WidebandSupport
         private int GetByteFromSamplePacket()
         {
 
-            byte[] packet = new byte[] {     
-                ( 128 | 32 | 16 | 2 ), // startHeader HiByte
-                ( 128 | 2 ), // startHeader LoByte
-                (64 | 2 | 1),  // LC1 startWord HiByte
-                (16 | 2 | 1),  // LC1 startWord LoByte
-                ( 2 | 1 ),  // LC1 lambda HiByte
-                ( 64 | 32 | 16 | 4 ), // LC1 lambda LoByte
+            byte[] packet = new byte[] {
+
+                0xB2,0x87, // headerHiByte, headerLoByte
+                0x43,0x13, // data word 1
+                0x03,0x6B, // data word 2
+                0x00,0x00, // data word 3
+                0x00,0x00, // data word 4
+                0x00,0x00, // data word 5
+                0x00,0x00, // data word 6
+                0x00,0x00  // data word 7
+
             };
-
-
-            // HEADER START
-            // byte[0] = "10011010"
-            // byte[1] = "10000010"
-            // length of subsequent words should be 2
-
-            // FIRST WORD
-            // byte[2] == "01000011"
-            // byte[3] == "00010011"
-            // start bit is set, multiplier is supposed to be 147
-
-            // SECOND WORD (lambda Value is supposed to be 500)
-            // byte[4] == "00000011"
-            // byte[5] == "01110100"
 
             if (sampleBytePacketIndex >= packet.Length)
             {

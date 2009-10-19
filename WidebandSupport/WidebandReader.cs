@@ -21,7 +21,7 @@ namespace WidebandReader
             }
             else
             {
-                wbFactory = new WidebandFactory("ZT2", "COM4", true);
+                wbFactory = new WidebandFactory("LM2", "COM4", true);
             }
 
             reader = wbFactory.CreateInstance();
