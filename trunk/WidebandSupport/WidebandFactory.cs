@@ -102,6 +102,9 @@ namespace WidebandSupport
                 case "LC1":
                     reader = new LC1WidebandReader(comPort);
                     break;
+                case "LM2":
+                    reader = new LM2WidebandReader(comPort);
+                    break;
                 case "ZT2":
                     reader = new ZT2WidebandReader(comPort);
                     break;
