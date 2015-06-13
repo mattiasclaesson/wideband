@@ -52,7 +52,7 @@ namespace WidebandSupport
 
             if (false == IsSerialPortNameValid(comPortName))
             {
-                throw new ArgumentException(comPortName + ", is invalid.");
+                throw new ArgumentException("com port: " + comPortName + ", is invalid.");
             }
 
             init(comPortName);
