@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.IO.Ports;
+using System.IO;
 
 namespace WidebandSupport
 {
@@ -221,6 +222,10 @@ namespace WidebandSupport
 
                 }
 
+            }
+            catch (IOException)
+            {
+                // ignore
             }
             finally
             {
