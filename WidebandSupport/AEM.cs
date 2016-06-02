@@ -93,8 +93,9 @@ namespace WidebandSupport
             comPort.DataBits = 8;
             comPort.Parity = Parity.None;
             comPort.StopBits = StopBits.One;
-            comPort.Handshake = Handshake.RequestToSend;
-
+            comPort.DtrEnable = true;
+            comPort.RtsEnable = true;
+            comPort.Handshake = Handshake.None;
         }
 
 
@@ -152,7 +153,8 @@ namespace WidebandSupport
                             line = comPort.ReadLine();
                         }
 
-                        if (line != null && 0 != line.Trim().Length && true == Double.TryParse(line, out afrValue))
+                        String converted = line.Replace(".", System.Threading.Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator);
+                        if (converted != null && 0 != converted.Trim().Length && true == Double.TryParse(converted, out afrValue))
                         {
                             latestReading = afrValue;
                         }
