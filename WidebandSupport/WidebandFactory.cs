@@ -111,6 +111,9 @@ namespace WidebandSupport
                 case "AEM":
                     reader = new AEMWidebandReader(comPort);
                     break;
+                case "STAG":
+                    reader = new STAGWidebandReader(comPort, testMode);
+                    break;
                 case "NOOP":
                     reader = new NOOPWidebandReader();
                     break;
