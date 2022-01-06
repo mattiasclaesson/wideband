@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using WidebandSupport;
 
 namespace WidebandReader

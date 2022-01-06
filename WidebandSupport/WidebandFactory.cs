@@ -15,8 +15,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.IO.Ports;
 using System.IO;
 
 namespace WidebandSupport
@@ -112,7 +110,7 @@ namespace WidebandSupport
                     reader = new AEMWidebandReader(comPort);
                     break;
                 case "STAG":
-                    reader = new STAGWidebandReader(comPort, testMode);
+                    reader = new STAGWidebandReader(comPort);
                     break;
                 case "NOOP":
                     reader = new NOOPWidebandReader();

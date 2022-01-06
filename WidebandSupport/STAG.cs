@@ -38,7 +38,12 @@ namespace WidebandSupport
         bool continueRunning = false;
 
         int sampleBytePacketIndex = 0; // this is only used for testing.
-        public bool TestMode { get; set; } = false;
+        private bool testMode = false; // if true, test mode
+        public bool TestMode
+        {
+            get { return testMode; }
+            set { testMode = value; }
+        }
 
         public STAGWidebandReader(String comPortName)
             : this(comPortName, false, new fuelTypeFunction(new FuelType().Gasoline))
