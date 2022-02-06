@@ -112,6 +112,9 @@ namespace WidebandSupport
                 case "STAG":
                     reader = new STAGWidebandReader(comPort);
                     break;
+                case "LambdaShield":
+                    reader = new LambdaWidebandReader(comPort);
+                    break;
                 case "NOOP":
                     reader = new NOOPWidebandReader();
                     break;
